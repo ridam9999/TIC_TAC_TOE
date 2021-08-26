@@ -7,8 +7,8 @@ WIN_SIZE = (640,480)
 main_clock = pygame.time.Clock()
 window = pygame.display.set_mode(WIN_SIZE)
 pygame.display.set_caption('Tic Tac Toe')
-cursor = pygame.Rect(100, 100, 100, 100)
-
+cursor_pos = [100, 90, 100, 100]
+cursor = pygame.Rect(cursor_pos)
 #colors
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -38,8 +38,22 @@ def draw_cursor():
     cursor_color = (200, 100, 150)
     pygame.draw.rect(window, cursor_color, cursor, 100, 4)
 
-def move_cursor():
-    pass
+def move_cursor(key):
+    if key == K_w and cursor_pos[1] >= 100:
+        cursor_pos[1] -= 140
+        cursor.update(cursor_pos)
+
+    if key == K_a and cursor_pos[0] >= 100:
+        cursor_pos[0] -= 160
+        cursor.update(cursor_pos)
+
+    if key == K_s and cursor_pos[1] <= 300:
+        cursor_pos[1] += 140
+        cursor.update(cursor_pos)
+
+    if key == K_d and cursor_pos[0] <= 300:
+        cursor_pos[0] += 160
+        cursor.update(cursor_pos)
 
 def particle_effect(x, y):
      particles.append([[x, y], [random.randint(-20,20)/10*-1, random.randint(-20,20)/10*-1],random.randint(50, 70)])
@@ -68,7 +82,7 @@ while True:
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 sys.exit()
-        
+            move_cursor(event.key)        
     pygame.display.update()
     main_clock.tick(60)
     
