@@ -48,25 +48,26 @@ def draw(): #draws X and O in the selected region
     window.blit(X, drawn_pos)
     board_images.append(drawn_pos)
 
-def move_cursor(key):
-    if (key == K_w or key == K_UP) and cursor_pos[1] >= 100:
+def move_cursor(key, turn):
+    if key == K_w and cursor_pos[1] >= 100:
         cursor_pos[1] -= 140
         cursor.update(cursor_pos)
 
-    if (key == K_a or key == K_LEFT) and cursor_pos[0] > 100:
+    if key == K_a and cursor_pos[0] > 100:
         cursor_pos[0] -= 160
         cursor.update(cursor_pos)
 
-    if (key == K_s or key == K_DOWN) and cursor_pos[1] <= 300:
+    if key == K_s and cursor_pos[1] <= 300:
         cursor_pos[1] += 140
         cursor.update(cursor_pos)
 
-    if (key == K_d or key == K_RIGHT) and cursor_pos[0] <= 300:
+    if key == K_d and cursor_pos[0] <= 300:
         cursor_pos[0] += 160
         cursor.update(cursor_pos)
     
-    if key == K_RETURN:
+    if key == K_RETURN and turn%2 == 1: 
         draw()
+        turn += 1
 
 def particle_effect(x, y):
      particles.append([[x, y], [random.randint(-20,20)/10*-1, random.randint(-20,20)/10*-1],random.randint(50, 60)])
@@ -84,12 +85,12 @@ def background_animation(x, y):
     width = 50
     height = 50
 
-    cubes.append([[x, y, width, height], [random.randint(-20,20)/10*-1, random.randint(-20,20)/10*-1],random.randint(5, 15)])
+    cubes.append([[x, y, width, height], [random.randint(-20,20)/10*-1, random.randint(-20,20)/10*-1],random.randint(50, 70)])
     
     for cube in cubes:
         cube[0][0] += cube[1][0]
         cube[0][1] += cube[1][1]
-        cube[2] -= 0.05
+        cube[2] -= 0.2
         pygame.draw.rect(window, gray, [int(cube[0][0]),int(cube[0][1]),int(cube[0][2]),int(cube[0][3])], int(cube[2]))
         if cube[2] <=0:
             cubes.remove(cube)
@@ -111,7 +112,7 @@ while True:
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 sys.exit()
-            move_cursor(event.key)        
+            move_cursor(event.key, turn)        
     pygame.display.update()
     main_clock.tick(60)
     
