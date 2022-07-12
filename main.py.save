@@ -13,8 +13,6 @@ window = pygame.display.set_mode(WIN_SIZE)
 pygame.display.set_caption('Tic Tac Toe')
 cursor_pos = [100, 85, 100, 100]  # Cursor position
 cursor = pygame.Rect(cursor_pos)
-comp = []
-
 
 # colors
 white = (255, 255, 255)
@@ -41,39 +39,21 @@ running = True
 # Function to render the board
 def can_win(board, i, j):
     b1 = board
-    b1[i][j] == 'O'
-    if check(b1, 'O') == 'O':
+    b1[i][j] == 'X'
+    if check(board, 'X') == 'X':
         return True
-    else:
-        return False
 
-# Function to determine computers move
 def comp_move(board):
     global board_images
-    global comp
-    a,b,x,y = -1,-1,0,0
-    #count = 0
-    #for i in range(3):
-    #    for j in range(3):
-    #        if board[i][j] == 0:
-    #            if can_win(board,i,j):
-    #                board[i][j] = 'O'
-    #                a,b = i,j
-    #            count +=1
-    #        elif count >= 5:
-    #            while board[a][b] == 0:
-    #                a = random.randint(0,3)
-    #                b = random.randint(0,3)
-    #                break;
     for i in range(3):
         for j in range(3):
             if board[i][j] == 0:
-                a,b = i,j
-                break
-    x,y = 116+a*160, 101+b*140
-    comp = [x,y,a,b]
-
-# Function to draw the board UI
+                if can_win():
+                    board[i][j] = 'O'
+                    x,y = 100+i*160, 85+j*140
+                    board_images.append(x+16, y+16)
+          
+                
 def draw_board():
     board = pygame.image.load('tic_tac_toe.png').convert()
     board.set_colorkey(black)
@@ -84,18 +64,15 @@ def draw_board():
         elif image[1] == 1:
             window.blit(O, image[0])
 
-# Function to render cursor in window
 def draw_cursor():
     cursor_color = (200, 100, 150, 150)
     pygame.draw.rect(window, cursor_color, cursor, 100, 4)
 
-# Function to render players
-def draw(player):
+def draw(player):  # draws X and O in the selected region
     global turn
     draw_player = True
     if player == 'X':
         drawn_pos = (cursor[0] + 16, cursor[1] + 16)
-        print(drawn_pos)
         for image in board_images:
             if image[0] == drawn_pos:
                 draw_player = False
@@ -104,22 +81,14 @@ def draw(player):
             board_images.append([drawn_pos, 0])
             turn += 1
     if player == 'O':
-        comp_move(board)
-        x,y = comp[0], comp[1]
-        drawn_pos = (x,y)
+        drawn_pos = (cursor[0] + 16, cursor[1] + 16)
+        for image in board_images:
+            if image[0] == drawn_pos:
+                draw_player = False
         if draw_player:
-            window.blit(O,drawn_pos)
-            board_images.append([drawn_pos, 1])
-            turn += 1
-   # if player == 'O':
-   #     drawn_pos = (cursor[0] + 16, cursor[1] + 16)
-   #     for image in board_images:
-   #         if image[0] == drawn_pos:
-   #             draw_player = False
-   #     if draw_player:
-   #         window.blit(O, drawn_pos)
-   #         board_images.append([drawn_pos,1])
-   #         turn += 1
+            window.blit(O, drawn_pos)
+            board_images.append([drawn_pos,1])   
+            turn += 1  
 
 def board_update(player):
     if player == 'X':
@@ -129,18 +98,25 @@ def board_update(player):
             x = 2
         if y == 3:
             y = 2
+
+        print(x, y)
+        if board[x][y] == 0:
+            board[x][y] = player
+        print(board)
+    
+    elif player == 'O':
+        x = int(cursor_pos[0] / 100) - 1
+        y = int(cursor_pos[1] / 85) - 1
+        if x == 3:
+            x = 2
+        if y == 3:
+            y = 2
+
+        print(x, y)
         if board[x][y] == 0:
             board[x][y] = player
         print(board)
 
-    elif player == 'O':
-       a,b = comp[2],comp[3]
-       print(a,b)
-       if board[a][b] == 0:
-            board[a][b] = player
-       print(board)
-
-# Function to render cursor
 def move_cursor(key):
     global turn
     if (key == K_w or key == K_UP) and cursor_pos[1] >= 100:
@@ -161,16 +137,15 @@ def move_cursor(key):
 
     if key == K_RETURN:
         if turn % 2 != 0:
-            draw('X')
             board_update('X')
-        if turn % 2 == 0:
-            draw('O')
+            draw('X')
+        elif turn % 2 == 0:
             board_update('O')
-            comp=[]
-
-#Function for square animation
-def background_animation(x, y):
-    width = 50      # [x,y,w,h] [x_vel, y_vel] [width]
+            draw('O')
+        
+def background_animation(x, y): #Function for square animation
+                                # [x,y,w,h] [x_vel, y_vel] [width]
+    width = 50
     height = 50
 
     cubes.append(
@@ -215,7 +190,7 @@ def particle_effect(x, y): #Function for particle animation
 
 def draw_end_screen(message):
     global font
-    f1 = pygame.font.Font('Roboto-Light.ttf', 100)
+    f1 = pygame.font.Font('Roboto-Bold.ttf', 100)
     end_screen = f1.render(message, True, white)
     restart = font.render('press Space', True, white)
     window.blit(end_screen, (165, 195))
@@ -256,7 +231,7 @@ def check(board, player): #Checks the board whether for win cases
     return winner
 
 def run():
-    global running, board, board_images, turn, comp
+    global running, board, board_images, turn
     is_full = True
     window.fill(black)
     background_animation(0, WIN_SIZE[1] * 1.5)
@@ -287,7 +262,6 @@ def run():
             if event.key == K_SPACE:
                 board = [[0,0,0],[0,0,0],[0,0,0]]
                 board_images = []
-                comp=[]
                 turn = 1
                 running = True
 
@@ -301,15 +275,16 @@ def run():
         draw_end_screen('O WINS')
         pygame.display.update()
         running = False
-
+    
     elif is_full:
         draw_end_screen('DRAW')
         pygame.display.update()
         running = False
-
+    
     pygame.display.update()
     main_clock.tick(60)
 
 # Main game loop:
+
 while True:
     run()
